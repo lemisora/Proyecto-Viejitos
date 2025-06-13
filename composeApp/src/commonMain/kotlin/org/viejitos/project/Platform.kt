@@ -1,0 +1,7 @@
+package org.viejitos.project
+
+interface Platform {
+    val name: String
+}
+
+expect fun getPlatform(): Platform
