@@ -10,6 +10,11 @@
   packages = with pkgs; [
   ];
 
+  android = {
+    enable = true;
+    reactNative.enable = true;
+  };
+
   languages = {
     javascript = {
       enable = true;
