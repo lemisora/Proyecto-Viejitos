@@ -37,7 +37,7 @@ export default function App() {
     // Las opciones son opcionales y pueden variar entre iOS y Android
     const options = {
       language: "es-MX", // Define el idioma (código BCP 47)
-      pitch: 1.0, // Tono de la voz (0.5 a 2.0)
+      pitch: 0.9, // Tono de la voz (0.5 a 2.0)
       rate: 0.9, // Velocidad de la voz (0.5 a 2.0)
     };
     Speech.speak(text, options);
