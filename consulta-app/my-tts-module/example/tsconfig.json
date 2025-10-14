@@ -1,0 +1,10 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "my-tts-module": ["../src/index"],
+      "my-tts-module/*": ["../src/*"]
+    }
+  }
+}
