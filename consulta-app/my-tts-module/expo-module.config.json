@@ -4,6 +4,7 @@
     "modules": ["MyTtsModule"]
   },
   "android": {
-    "modules": ["expo.modules.myttsmodule.MyTtsModule"]
+    "modules": ["expo.modules.myttsmodule.MyTtsModule"],
+    "configPlugin": "./includeMyServicePlugin.js"
   }
 }
