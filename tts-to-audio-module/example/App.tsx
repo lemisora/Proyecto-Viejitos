@@ -7,8 +7,8 @@ import {
   Button,
   TextInput,
   Alert,
-  SafeAreaView,
 } from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
 // 1. Importa tu función desde el nombre del módulo
 // (Esto funciona porque la app 'example' tiene tu módulo como dependencia)
