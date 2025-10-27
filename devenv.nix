@@ -1,12 +1,18 @@
-{ pkgs, lib, config, inputs, ... }:
+{
+  pkgs,
+  lib,
+  config,
+  inputs,
+  ...
+}:
 
 {
 
   # https://devenv.sh/packages/
-  packages = [ 
-    
+  packages = [
+
   ];
-  
+
   # https://devenv.sh/languages/
   languages.javascript = {
     enable = true;
@@ -26,8 +32,7 @@
   # '';
 
   # https://devenv.sh/basics/
-  enterShell = ''
-  '';
+  enterShell = '''';
 
   # https://devenv.sh/tasks/
   # tasks = {
@@ -36,6 +41,5 @@
   # };
 
   # https://devenv.sh/tests/
-  enterTest = ''
-  '';
+  enterTest = '''';
 }
