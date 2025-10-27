@@ -20,7 +20,7 @@
   };
 
   env.ANDROID_HOME = [ "/home/lemisora/studio_files" ];
-
+  
   # https://devenv.sh/processes/
   # processes.dev.exec = "${lib.getExe pkgs.watchexec} -n -- ls -la";
 
