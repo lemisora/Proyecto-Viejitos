@@ -8,6 +8,13 @@ export * from './TTSToAudioModule.types';
 export async function generateAudioFromTTS(text: string): Promise<string> {
   return await TTSToAudioModule.generateAudioFromTTS(text);
 }
+
+export async function scheduleAudioPlayback(filePath: string, delayInSeconds: number): Promise<string> {
+  if (delayInSeconds < 1) {
+    throw new Error("Delay must be at least 1 second");
+  }
+  return await TTSToAudioModule.scheduleAudioPlayback(filePath, delayInSeconds);
+}
 // // Esta está bien (es síncrona)
 // export function saveAudioToStorage(): string { 
 //   return TTSToAudioModule.saveAudioToStorage();

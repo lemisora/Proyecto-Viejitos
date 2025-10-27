@@ -9,6 +9,8 @@ declare class TTSToAudioModule extends NativeModule<TTSToAudioModuleEvents> {
   
   // AsyncFunction en Kotlin -> Promise<string> en TypeScript
   generateAudioFromTTS(text: string): Promise<string>;
+  
+  scheduleAudioPlayback(filePath: string, delayInSeconds: number): Promise<string>;
 }
 
 // This call loads the native module object from the JSI.

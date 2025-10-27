@@ -12,6 +12,10 @@ import java.io.File
 import java.util.Locale
 import java.util.UUID
 import android.os.Environment
+import androidx.work.Data
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import java.util.concurrent.TimeUnit
 
 // 1. Implementa TextToSpeech.OnInitListener
 class TTSToAudioModule : Module(), TextToSpeech.OnInitListener {
@@ -114,6 +118,37 @@ class TTSToAudioModule : Module(), TextToSpeech.OnInitListener {
 
       if (result == TextToSpeech.ERROR) {
         promise.reject("E_TTS_SYNTHESIS_FAILED", "synthesizeToFile returned ERROR", null)
+      }
+    }
+
+    /**
+     * Programa la reproducción de un archivo de audio después de un retraso.
+     * @param filePath La ruta al archivo .wav a reproducir.
+     * @param delayInSeconds El número de segundos a esperar antes de reproducir.
+     */
+    AsyncFunction("scheduleAudioPlayback") { filePath: String, delayInSeconds: Long, promise: Promise ->
+      try {
+        // 1. Prepara los datos de entrada para el Worker
+        val inputData = Data.Builder()
+          .putString(AudioPlaybackWorker.KEY_FILE_PATH, filePath)
+          .build()
+
+        // 2. Crea la solicitud de trabajo (WorkRequest)
+        val playbackWorkRequest = OneTimeWorkRequestBuilder<AudioPlaybackWorker>()
+          .setInitialDelay(delayInSeconds, TimeUnit.SECONDS)
+          .setInputData(inputData)
+          .addTag("audio-playback") // Un tag para identificar el trabajo
+          .build()
+
+        // 3. Envía la solicitud al sistema
+        WorkManager.getInstance(context).enqueue(playbackWorkRequest)
+
+        Log.i("TTSToAudioModule", "Audio playback scheduled in $delayInSeconds seconds.")
+        promise.resolve("Audio playback scheduled successfully for file: $filePath")
+
+      } catch (e: Exception) {
+        Log.e("TTSToAudioModule", "Failed to schedule audio playback", e)
+        promise.reject("E_SCHEDULE_FAILED", "Failed to schedule audio playback", e)
       }
     }
 

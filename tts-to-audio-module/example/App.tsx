@@ -12,12 +12,14 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 
 // 1. Importa tu función desde el nombre del módulo
 // (Esto funciona porque la app 'example' tiene tu módulo como dependencia)
-import { generateAudioFromTTS } from 'tts-to-audio-module';
+import { generateAudioFromTTS, scheduleAudioPlayback} from 'tts-to-audio-module';
 
 export default function App() {
   const [text, setText] = useState('Hola mundo desde mi módulo nativo');
   const [filePath, setFilePath] = useState<string | null>(null);
   const [sound, setSound] = useState<Audio.Sound | null>(null);
+  
+  const [delay, setDelay] = useState('10'); // 10 segundos por defecto
 
   // --- Llama a tu función nativa ---
   const handleGenerateAudio = async () => {
@@ -67,6 +69,28 @@ export default function App() {
       Alert.alert('Error de reproducción', e.message);
     }
   };
+  
+  const handleScheduleAudio = async () => {
+      if (!filePath) {
+        Alert.alert('Error', 'Primero genera un archivo de audio.');
+        return;
+      }
+  
+      const delaySeconds = parseInt(delay, 10);
+      if (isNaN(delaySeconds) || delaySeconds <= 0) {
+        Alert.alert('Error', 'Ingresa un número válido de segundos.');
+        return;
+      }
+  
+      try {
+        // ¡Aquí se llama a la nueva función!
+        const result = await scheduleAudioPlayback(filePath, delaySeconds);
+        Alert.alert('¡Programado!', `${result}\nCierra la app para probar.`);
+        console.log(result);
+      } catch (e: any) {
+        Alert.alert('Error al programar', e.message);
+      }
+    };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -92,6 +116,24 @@ export default function App() {
             />
           </View>
         )}
+        
+        {filePath && (
+                  <View style={styles.schedulingSection}>
+                    <Text style={styles.title}>Programar Reproducción</Text>
+                    <TextInput
+                      style={styles.input}
+                      value={delay}
+                      onChangeText={setDelay}
+                      placeholder="Segundos de espera"
+                      keyboardType="number-pad"
+                    />
+                    <Button
+                      title={`Programar audio en ${delay} seg.`}
+                      onPress={handleScheduleAudio}
+                      color="#FF6347"
+                    />
+                  </View>
+                )}
       </View>
     </SafeAreaView>
   );
@@ -131,4 +173,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     fontStyle: 'italic',
   },
+  schedulingSection: {
+      marginTop: 30,
+      paddingTop: 20,
+      borderTopWidth: 1,
+      borderTopColor: '#eee',
+    },
 });

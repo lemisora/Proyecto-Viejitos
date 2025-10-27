@@ -41,3 +41,8 @@ android {
     abortOnError false
   }
 }
+
+dependencies {
+  // Aquí puedes añadir tus dependencias
+  implementation "androidx.work:work-runtime-ktx:2.11.0"
+}
