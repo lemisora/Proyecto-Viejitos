@@ -11,6 +11,7 @@ import expo.modules.kotlin.Promise
 import java.io.File
 import java.util.Locale
 import java.util.UUID
+import android.os.Environment
 
 // 1. Implementa TextToSpeech.OnInitListener
 class TTSToAudioModule : Module(), TextToSpeech.OnInitListener {
@@ -41,7 +42,7 @@ class TTSToAudioModule : Module(), TextToSpeech.OnInitListener {
   }
 
   override fun definition() = ModuleDefinition {
-    Name("TTSToAudio")
+    Name("TTSToAudioModule")
 
     OnCreate {
       // Inicializamos TTS
@@ -68,8 +69,15 @@ class TTSToAudioModule : Module(), TextToSpeech.OnInitListener {
 
       // 1. Crear un archivo de destino en el directorio caché de la app
       val fileName = "tts_audio_${UUID.randomUUID()}.wav"
+
+      // Obtiene el directorio de música específico de tu app (p.ej. Android/data/.../files/Music)
+      val storageDir = context.getExternalFilesDir(Environment.DIRECTORY_MUSIC)
+
+      // (Opcional pero recomendado) Asegúrate de que el directorio exista
+      storageDir?.mkdirs()
+
       // Usamos cacheDir (almacenamiento interno, no requiere permisos)
-      val file = File(context.cacheDir, fileName)
+      val file = File(storageDir, fileName)
       val filePath = file.absolutePath
 
       // 2. Configurar un listener para saber CUÁNDO TERMINA la síntesis
