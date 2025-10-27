@@ -16,6 +16,9 @@ import androidx.work.Data
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import java.util.concurrent.TimeUnit
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.os.Build
 
 // 1. Implementa TextToSpeech.OnInitListener
 class TTSToAudioModule : Module(), TextToSpeech.OnInitListener {
@@ -26,6 +29,27 @@ class TTSToAudioModule : Module(), TextToSpeech.OnInitListener {
   // Obtenemos el contexto de la aplicación
   private val context: Context
     get() = appContext.reactContext ?: throw IllegalStateException("React context is null")
+
+  private fun createNotificationChannel() {
+    // Solo crea el canal en Android 8.0 (API 26) o superior
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      val channelId = "audio-playback-channel" // Un ID para tu canal
+      val name = "Reproducción de Audio"
+      val descriptionText = "Canal para notificaciones de recordatorios de audio"
+      val importance = NotificationManager.IMPORTANCE_HIGH // Importancia alta
+
+      val channel = NotificationChannel(channelId, name, importance).apply {
+        description = descriptionText
+      }
+
+      // Registra el canal con el sistema
+      val notificationManager: NotificationManager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+      notificationManager.createNotificationChannel(channel)
+      Log.i("TTSToAudioModule", "Notification Channel Created.")
+    }
+  }
 
   // 3. Callback de OnInitListener: Se llama cuando TTS está listo
   override fun onInit(status: Int) {
@@ -52,6 +76,7 @@ class TTSToAudioModule : Module(), TextToSpeech.OnInitListener {
       // Inicializamos TTS
       tts = TextToSpeech(context, this@TTSToAudioModule)
       Log.i("TTSToAudioModule", "TTS Initialization requested")
+      createNotificationChannel()
     }
 
     OnDestroy {

@@ -9,6 +9,13 @@ import androidx.work.workDataOf
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import android.content.pm.PackageManager
+import android.Manifest
+import androidx.annotation.RequiresPermission
+import androidx.core.content.ContextCompat
+
 class AudioPlaybackWorker(
     appContext: Context, workerParams: WorkerParameters) :
     CoroutineWorker(appContext, workerParams
@@ -24,6 +31,8 @@ class AudioPlaybackWorker(
         }
 
         Log.i("AudioPlaybackWorker", "Worker started. Playing file: $filePath")
+
+        showNotification("Reproduciendo tu recordatorio de audio...")
 
         // Usamos una corutina para esperar a que el MediaPlayer termine
         return try {
@@ -82,6 +91,34 @@ class AudioPlaybackWorker(
         continuation.invokeOnCancellation {
             Log.i("AudioPlaybackWorker", "Worker cancelled. Releasing MediaPlayer.")
             mediaPlayer?.release()
+        }
+    }
+
+    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
+    private fun showNotification(message: String) {
+        val channelId = "audio-playback-channel" // Debe ser el MISMO ID del Paso 2
+        val notificationId = 1 // Un ID único para esta notificación
+
+        // Construye la notificación
+        val builder = NotificationCompat.Builder(applicationContext, channelId)
+            .setSmallIcon(applicationContext.applicationInfo.icon) // Usa el icono de la app
+            .setContentTitle("Recordatorio de Audio")
+            .setContentText(message)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true) // La notificación se cierra al tocarla
+
+        val notificationManager = NotificationManagerCompat.from(applicationContext)
+
+        // IMPORTANTE: Verifica si tiene permiso antes de notificar (para Android 13+)
+        if (ContextCompat.checkSelfPermission(
+                applicationContext,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            notificationManager.notify(notificationId, builder.build())
+            Log.i("AudioPlaybackWorker", "Notification posted.")
+        } else {
+            Log.w("AudioPlaybackWorker", "POST_NOTIFICATIONS permission not granted. Skipping notification.")
         }
     }
 
