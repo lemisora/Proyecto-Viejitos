@@ -11,6 +11,8 @@ declare class TTSToAudioModule extends NativeModule<TTSToAudioModuleEvents> {
   generateAudioFromTTS(text: string): Promise<string>;
   
   scheduleAudioPlayback(filePath: string, delayInSeconds: number): Promise<string>;
+  
+  scheduleAudioPlaybackAtTimestamp(filePath: string, timestampInMillis: number): Promise<string>;
 }
 
 // This call loads the native module object from the JSI.

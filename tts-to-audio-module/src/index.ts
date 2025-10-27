@@ -15,6 +15,19 @@ export async function scheduleAudioPlayback(filePath: string, delayInSeconds: nu
   }
   return await TTSToAudioModule.scheduleAudioPlayback(filePath, delayInSeconds);
 }
+
+export async function scheduleAudioPlaybackAtTimestamp(filePath: string, date: Date): Promise<string> {
+  const timestampInMillis = date.getTime();
+  const now = Date.now();
+
+  // Validación en JavaScript (buena práctica, duplica la nativa)
+  if (timestampInMillis <= now) {
+    throw new Error("La fecha y hora proporcionadas están en el pasado.");
+  }
+
+  // Llama a la función nativa con el timestamp en milisegundos
+  return await TTSToAudioModule.scheduleAudioPlaybackAtTimestamp(filePath, timestampInMillis);
+}
 // // Esta está bien (es síncrona)
 // export function saveAudioToStorage(): string { 
 //   return TTSToAudioModule.saveAudioToStorage();

@@ -177,6 +177,47 @@ class TTSToAudioModule : Module(), TextToSpeech.OnInitListener {
       }
     }
 
+    /**
+     * Programa la reproducción de un audio en una fecha y hora específicas.
+     * @param filePath La ruta al archivo .wav a reproducir.
+     * @param timestampInMillis La fecha/hora de ejecución, en milisegundos desde la época Unix (UTC).
+     */
+    AsyncFunction("scheduleAudioPlaybackAtTimestamp") { filePath: String, timestampInMillis: Long, promise: Promise ->
+      try {
+        // 1. Calcular el retraso
+        val currentTimeMillis = System.currentTimeMillis()
+        val delayInMillis = timestampInMillis - currentTimeMillis
+        val delayInSeconds = delayInMillis / 1000
+
+        // 2. Validación CRÍTICA
+        if (delayInSeconds <= 0) {
+          Log.w("TTSToAudioModule", "Timestamp provided is in the past ($timestampInMillis). Will not schedule.")
+          promise.reject("E_SCHEDULE_FAILED", "La fecha y hora proporcionadas están en el pasado.", null)
+          return@AsyncFunction
+        }
+
+        // 3. Reutilizar la lógica de WorkManager (esto es idéntico a la otra función)
+        val inputData = Data.Builder()
+          .putString(AudioPlaybackWorker.KEY_FILE_PATH, filePath)
+          .build()
+
+        val playbackWorkRequest = OneTimeWorkRequestBuilder<AudioPlaybackWorker>()
+          .setInitialDelay(delayInSeconds, TimeUnit.SECONDS) // Usamos el retraso calculado
+          .setInputData(inputData)
+          .addTag("audio-playback-timestamp") // Un tag diferente
+          .build()
+
+        WorkManager.getInstance(context).enqueue(playbackWorkRequest)
+
+        Log.i("TTSToAudioModule", "Audio playback scheduled for timestamp $timestampInMillis (in $delayInSeconds seconds).")
+        promise.resolve("Audio playback scheduled successfully for $filePath")
+
+      } catch (e: Exception) {
+        Log.e("TTSToAudioModule", "Failed to schedule audio playback at timestamp", e)
+        promise.reject("E_SCHEDULE_FAILED", "Failed to schedule audio playback at timestamp", e)
+      }
+    }
+
     // --- OTRAS FUNCIONES (Sugerencia) ---
     // Estas funciones probablemente deberían ser asíncronas también
     // si van a interactuar con bases de datos o archivos.

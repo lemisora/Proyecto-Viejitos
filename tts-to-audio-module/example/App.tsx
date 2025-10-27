@@ -1,6 +1,14 @@
 import { Audio } from "expo-av";
 import React, { useState } from "react";
-import { StyleSheet, Text, View, Button, TextInput, Alert } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Button,
+  TextInput,
+  Alert,
+  Platform,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Notifications from "expo-notifications";
 
@@ -9,7 +17,10 @@ import * as Notifications from "expo-notifications";
 import {
   generateAudioFromTTS,
   scheduleAudioPlayback,
+  scheduleAudioPlaybackAtTimestamp,
 } from "tts-to-audio-module";
+
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 export default function App() {
   const [text, setText] = useState("Hola mundo desde mi módulo nativo");
@@ -17,6 +28,8 @@ export default function App() {
   const [sound, setSound] = useState<Audio.Sound | null>(null);
 
   const [delay, setDelay] = useState("10"); // 10 segundos por defecto
+  const [date, setDate] = useState(new Date(Date.now() + 60000));
+  const [isPickerVisible, setPickerVisible] = useState(false);
 
   async function requestPermissions() {
     const { status } = await Notifications.requestPermissionsAsync();
@@ -100,6 +113,42 @@ export default function App() {
     }
   };
 
+  const showDateTimePicker = () => {
+    setPickerVisible(true);
+  };
+
+  const hideDateTimePicker = () => {
+    setPickerVisible(false);
+  };
+
+  const handleConfirm = (selectedDate: Date) => {
+    setDate(selectedDate);
+    hideDateTimePicker();
+  };
+
+  const handleScheduleAtTimestamp = async () => {
+    if (!filePath) {
+      Alert.alert("Error", "Primero genera un archivo de audio.");
+      return;
+    }
+
+    // 1. Pide permisos de notificación
+    const hasPermission = await requestPermissions();
+    if (!hasPermission) return;
+
+    try {
+      // 2. ¡Llama a la nueva función del módulo!
+      const result = await scheduleAudioPlaybackAtTimestamp(filePath, date);
+      Alert.alert(
+        "¡Programado!",
+        `${result}\n\nProgramado para: ${date.toLocaleString()}\n\nCierra la app para probar.`,
+      );
+      console.log(result);
+    } catch (e: any) {
+      Alert.alert("Error al programar", e.message);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
@@ -139,6 +188,37 @@ export default function App() {
               title={`Programar audio en ${delay} seg.`}
               onPress={handleScheduleAudio}
               color="#FF6347"
+            />
+          </View>
+        )}
+
+        {filePath && (
+          <View style={styles.schedulingSection}>
+            <Text style={styles.title}>Programar por Fecha/Hora</Text>
+
+            <Button
+              title="Seleccionar Fecha y Hora"
+              onPress={showDateTimePicker}
+            />
+
+            <Text style={styles.dateText}>
+              Programado para: {date.toLocaleString()}
+            </Text>
+
+            {/* 4. EL COMPONENTE ES DIFERENTE */}
+            <DateTimePickerModal
+              isVisible={isPickerVisible}
+              mode="datetime"
+              onConfirm={handleConfirm}
+              onCancel={hideDateTimePicker}
+              date={date} // Opcional: para que inicie en la fecha seleccionada
+              minimumDate={new Date(Date.now() + 10000)}
+            />
+
+            <Button
+              title="Programar en esta Fecha"
+              onPress={handleScheduleAtTimestamp}
+              color="#841584"
             />
           </View>
         )}
@@ -186,5 +266,11 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     borderTopWidth: 1,
     borderTopColor: "#eee",
+  },
+  dateText: {
+    // Estilo para el texto de la fecha
+    textAlign: "center",
+    fontSize: 16,
+    marginVertical: 10,
   },
 });
