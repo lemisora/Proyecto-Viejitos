@@ -1,0 +1,10 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "tts-to-audio-module": ["../src/index"],
+      "tts-to-audio-module/*": ["../src/*"]
+    }
+  }
+}

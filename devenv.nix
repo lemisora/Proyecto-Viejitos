@@ -7,72 +7,39 @@
 }:
 
 {
-  packages = with pkgs; [
-    android-tools
+
+  # https://devenv.sh/packages/
+  packages = [
+
   ];
 
-  android = {
+  # https://devenv.sh/languages/
+  languages.javascript = {
     enable = true;
-    reactNative.enable = true;
+    npm.enable = true;
   };
 
-  languages = {
-    javascript = {
-      enable = true;
+  env.ANDROID_HOME = [ "/home/lemisora/studio_files" ];
+  
+  # https://devenv.sh/processes/
+  # processes.dev.exec = "${lib.getExe pkgs.watchexec} -n -- ls -la";
 
-      package = pkgs.nodejs;
+  # https://devenv.sh/services/
+  # services.postgres.enable = true;
 
-      npm = {
-        enable = true;
-        # el paquete npm por defecto viene con node; si quieres usar
-        # un package npm separado podrías poner pkgs.nodePackages.npm
-        # package = pkgs.nodejs;
-        install.enable = false; # We'll control installs manually below
-      };
-    };
-  };
+  # https://devenv.sh/scripts/
+  # scripts.hello.exec = ''
+  # '';
 
-  tasks = {
-    "project:clean" = {
-      exec = ''
-        echo "🧹 Limpiando dependencias (node_modules, package-lock.json) y reinstalando..."
-        rm -rf node_modules package-lock.json
-        npm cache clean --force
-        echo "✅ Limpieza completa"
-      '';
-    };
-    "project:setup-dev" = {
-      exec = ''
-        echo "→ Instalando @angular/cli y @ionic/cli localmente (devDependencies)..."
-        npm install --no-audit --no-fund --save-dev @angular/cli @ionic/cli
-        echo "✅ Herramientas instaladas en node_modules/.bin"
-      '';
-    };
-  };
+  # https://devenv.sh/basics/
+  enterShell = '''';
 
-  enterShell = ''
-    echo "🔧 Node: $(node -v) | npm: $(npm -v)"
-    export PATH="$PWD/node_modules/.bin:$PATH"
-    export NODE_OPTIONS="--openssl-legacy-provider"
+  # https://devenv.sh/tasks/
+  # tasks = {
+  #   "myproj:setup".exec = "mytool build";
+  #   "devenv:enterShell".after = [ "myproj:setup" ];
+  # };
 
-    if command -v ng >/dev/null; then
-      echo "✅ Angular CLI detectado: $(ng version | head -n 10)"
-    else
-      echo "⚠️ Angular CLI no instalado. Ejecuta: devenv tasks run project:setup-dev"
-    fi
-
-    if command -v ionic >/dev/null; then
-      echo "✅ Ionic CLI detectado: $(ionic --version)"
-    else
-      echo "⚠️ Ionic CLI no instalado. Ejecuta: devenv run project:setup-dev"
-    fi
-
-    echo "Para iniciar el servidor en background: devenv up ionic-dev"
-    echo "Para detener todos los procesos: devenv down"
-    echo "Para limpiar (npm): devenv tasks run project:clean"
-  '';
-
-  enterTest = ''
-    echo "Test: git: $(git --version)"
-  '';
+  # https://devenv.sh/tests/
+  enterTest = '''';
 }
