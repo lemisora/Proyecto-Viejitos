@@ -1,7 +1,7 @@
 // Reexportar la vista y los tipos está bien
 export { default as TTSToAudioView } from './TTSToAudioModuleView';
 export * from './TTSToAudioModule.types';
-export {default} from './TTSToAudioModule';
+// export {default} from './TTSToAudioModule';
 export { default as TTSToAudioModuleView} from './TTSToAudioModuleView';
 
 // Importa el módulo nativo (el objeto)
