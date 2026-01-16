@@ -1,13 +1,36 @@
 import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { Platform, StyleSheet, Button, Alert } from 'react-native';
 
 import { HelloWave } from '@/components/hello-wave';
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+
+// Se importan las funciones del módulo nativo TTS
+import { generateAudioFromTTS} from 'tts-to-audio-module';
 
 export default function HomeScreen() {
+
+  // Función para probar la generación de audio
+  const handleGenerateAudio = async () => {
+    try {
+      const result = await generateAudioFromTTS("Hola, este es un audio generado desde NixOS");
+      Alert.alert("Éxito", `Audio generado en: ${result}`);
+    } catch (error: any) {
+      Alert.alert("Error", error.message);
+    }
+  };
+
+  // Función para probar añadir un recordatorio
+  const handleAddReminder = async () => {
+    try {
+      // const result = await addReminder("Tomar medicina");
+      Alert.alert("Recordatorio", "Recordatorio agregado");
+    } catch (error: any) {
+      Alert.alert("Error", error.message);
+    }
+  };
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
@@ -21,58 +44,17 @@ export default function HomeScreen() {
         <ThemedText type="title">Welcome!</ThemedText>
         <HelloWave />
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
+      {/*Sección para probar la generación de audio*/}
       <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
+        <ThemedText type="subtitle">Step 4: Native Module Test</ThemedText>
         <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
+          Usa los botones de abajo para probar tu módulo nativo TTS.
         </ThemedText>
+        <ThemedView style={styles.buttonContainer}>
+          <Button title="Generar Audio TTS" onPress={handleGenerateAudio} />
+          <Button title="Añadir Recordatorio" onPress={handleAddReminder} color="#4CAF50" />
+        </ThemedView>
       </ThemedView>
     </ParallaxScrollView>
   );
@@ -87,6 +69,10 @@ const styles = StyleSheet.create({
   stepContainer: {
     gap: 8,
     marginBottom: 8,
+  },
+  buttonContainer: {
+    gap: 10,
+    marginTop: 5,
   },
   reactLogo: {
     height: 178,
