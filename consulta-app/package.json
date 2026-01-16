@@ -36,7 +36,7 @@
     "react-native-safe-area-context": "~5.6.0",
     "react-native-screens": "~4.16.0",
     "react-native-web": "~0.21.0",
-    "my-tts-module": "file:my-tts-module"
+    "tts-to-audio-module": "file:../tts-to-audio-module"
   },
   "devDependencies": {
     "@types/react": "~19.1.0",
@@ -45,5 +45,8 @@
     "eslint-config-expo": "~10.0.0",
     "@react-native-community/cli": "latest"
   },
-  "private": true
+  "private": true,
+  "autolinking": {
+    "nativeModulesDir": "./node_modules/tts-to-audio-module"
+  }
 }
