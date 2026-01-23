@@ -13,7 +13,9 @@
     "prepublishOnly": "expo-module prepublishOnly",
     "expo-module": "expo-module",
     "open:ios": "xed example/ios",
-    "open:android": "open -a \"Android Studio\" example/android"
+    "open:android": "open -a \"Android Studio\" example/android",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "keywords": [
     "react-native",
@@ -28,7 +30,11 @@
   "author": "lemisora <leonardo.michel.dom@gmail.com> (https://github.com/lemisora)",
   "license": "MIT",
   "homepage": "https://github.com/lemisora/tts-to-audio-module#readme",
-  "dependencies": {},
+  "dependencies": {
+    "expo": "~54.0.20",
+    "react": "19.1.0",
+    "react-native": "0.81.5"
+  },
   "devDependencies": {
     "@types/react": "~19.1.0",
     "expo-module-scripts": "^5.0.7",
