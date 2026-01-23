@@ -1,35 +1,38 @@
 # tts-to-audio-module
 
-Generator of Audio from text to save it to FileSystem then playing it
+Generador de audio a partir de texto mediante las funciones de TTS nativas del sistema operativo móvil en el que se ejecuta, actualmente limitado únicamente a Android.
 
-# API documentation
+## Objetivo del módulo
+- Generar audio y grabar en archivo de audio a partir de texto
+- Ofrecer una interfaz mediante la que en React Native se pueda mandar texto a la función de TTS nativa del sistema operativo móvil
+- Permitir la reproducción de audio a partir de archivo de audio
+- Permitir la reproducción de dicho audio en segundo plano sin tantas exclusiones por ahorro de batería por parte de las distintas capas de personalización de Android.
 
-- [Documentation for the latest stable release](https://docs.expo.dev/versions/latest/sdk/tts-to-audio-module/)
-- [Documentation for the main branch](https://docs.expo.dev/versions/unversioned/sdk/tts-to-audio-module/)
+## Funciones disponibles
+- ```typescript
+  generateAudioFromTTS(text: string): Promise<string>
+  Se manda el texto como parámetro y devuelve la ruta del archivo de audio generado.
 
-# Installation in managed Expo projects
+  Ejemplo:
+  const audioPath = await TTSToAudioModule.generateAudioFromTTS("Hola, ¿cómo estás?");
+  ```
 
-For [managed](https://docs.expo.dev/archive/managed-vs-bare/) Expo projects, please follow the installation instructions in the [API documentation for the latest stable release](#api-documentation). If you follow the link and there is no documentation available then this library is not yet usable within managed projects &mdash; it is likely to be included in an upcoming Expo SDK release.
+- ```typescript
+  scheduleAudioPlayback(filePath: string, delayInSeconds: number): Promise<string>
+  Programa la reproducción de un archivo de audio después de un retraso.
+  El archivo de audio debe estar en el almacenamiento interno de la aplicación (no requiere permisos).
 
-# Installation in bare React Native projects
+  Ejemplo:
+  const audioPath = await TTSToAudioModule.scheduleAudioPlayback("audio.wav", 5);
+  ```
 
-For bare React Native projects, you must ensure that you have [installed and configured the `expo` package](https://docs.expo.dev/bare/installing-expo-modules/) before continuing.
+- ```typescript
+  scheduleAudioPlaybackAtTimestamp(filePath: string, timestampInMillis: number): Promise<string>
+  Programa la reproducción de un audio en una fecha y hora específicas.
+  El archivo de audio debe estar en el almacenamiento interno de la aplicación (no requiere permisos).
 
-### Add the package to your npm dependencies
 
+  Ejemplo:
+  const audioPath = await TTSToAudioModule.scheduleAudioPlaybackAtTimestamp("audio.wav", 1650000000);
 ```
-npm install tts-to-audio-module
-```
 
-### Configure for Android
-
-
-
-
-### Configure for iOS
-
-Run `npx pod-install` after installing the npm package.
-
-# Contributing
-
-Contributions are very welcome! Please refer to guidelines described in the [contributing guide]( https://github.com/expo/expo#contributing).
