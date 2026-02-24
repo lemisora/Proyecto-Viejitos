@@ -1,98 +1,88 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
+import withObservables from '@nozbe/with-observables';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+// Importamos la instancia de la base de datos y la colección que definiste
+import { database, usuariosCollection } from '../../src/database/database';
 
-export default function HomeScreen() {
+// ═══════════════════════════════════════════════════════════════
+// 1. COMPONENTE DE LA LISTA (Observador)
+// ═══════════════════════════════════════════════════════════════
+// Este componente recibe la prop 'usuarios' que le inyectará WatermelonDB
+const ListaUsuarios = ({ usuarios }) => {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Huevos!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <FlatList
+      data={usuarios}
+      keyExtractor={(item) => item.id}
+      renderItem={({ item }) => (
+        <View style={styles.card}>
+          <Text style={styles.nombre}>{item.nombre} {item.apellidoP}</Text>
+          <Text style={styles.edad}>Edad aprox: {item.edad} años</Text>
+        </View>
+      )}
+      ListEmptyComponent={<Text style={styles.empty}>No hay usuarios todavía. ¡Agrega uno!</Text>}
+    />
+  );
+};
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+// Conectamos el componente a la colección de forma reactiva
+const ListaUsuariosReactiva = withObservables([], () => ({
+  usuarios: usuariosCollection.query() // Observa todos los usuarios
+}))(ListaUsuarios);
+
+
+// ═══════════════════════════════════════════════════════════════
+// 2. PANTALLA PRINCIPAL
+// ═══════════════════════════════════════════════════════════════
+export default function HomeScreen() {
+
+  // Función para agregar un usuario de prueba a la BD
+  const agregarUsuarioPrueba = async () => {
+    try {
+      // TODA escritura en WatermelonDB debe ir dentro de database.write()
+      await database.write(async () => {
+        await usuariosCollection.create(usuario => {
+          usuario.nombre = 'Juan';
+          usuario.apellidoP = 'Pérez';
+          usuario.apellidoM = 'Gómez';
+          // Generamos una fecha de nacimiento de hace unos 70 años aprox (timestamp)
+          usuario.fechaNacimiento = Date.now() - (70 * 365 * 24 * 60 * 60 * 1000); 
+          usuario.telefono = '555-1234';
+        });
+      });
+      console.log("¡Usuario agregado con éxito!");
+    } catch (error) {
+      console.error("Error al agregar usuario:", error);
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.titulo}>Base de Datos Local</Text>
+      
+      {/* Usamos el componente reactivo que creamos arriba */}
+      <View style={styles.listaContainer}>
+        <ListaUsuariosReactiva />
+      </View>
+
+      <TouchableOpacity style={styles.boton} onPress={agregarUsuarioPrueba}>
+        <Text style={styles.textoBoton}>+ Agregar Paciente de Prueba</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 
+// ═══════════════════════════════════════════════════════════════
+// ESTILOS BÁSICOS
+// ═══════════════════════════════════════════════════════════════
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
+  container: { flex: 1, padding: 20, backgroundColor: '#f5f5f5', marginTop: 40 },
+  titulo: { fontSize: 24, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
+  listaContainer: { flex: 1, marginBottom: 20 },
+  card: { backgroundColor: 'white', padding: 15, borderRadius: 10, marginBottom: 10, elevation: 2 },
+  nombre: { fontSize: 18, fontWeight: 'bold' },
+  edad: { color: '#666', marginTop: 5 },
+  empty: { textAlign: 'center', color: '#999', marginTop: 50, fontSize: 16 },
+  boton: { backgroundColor: '#007AFF', padding: 15, borderRadius: 10, alignItems: 'center' },
+  textoBoton: { color: 'white', fontSize: 16, fontWeight: 'bold' }
 });
