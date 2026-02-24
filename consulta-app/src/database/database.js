@@ -11,16 +11,16 @@ import { Database } from '@nozbe/watermelondb'
 import SQLiteAdapter from '@nozbe/watermelondb/adapters/sqlite'
 
 // Importar schema y migraciones
-import schema from '../model/schema'
-import migrations from '../model/migrations'
+import schema from './model/schema'
+import migrations from './model/migrations'
 
 // Importar todos los modelos
-import Usuario from '../model/Usuario'
-import CatalogoMedicinas from '../model/CatalogoMedicinas'
-import Receta from '../model/Receta'
-import HorarioMedicacion from '../model/HorarioMedicacion'
-import Cita from '../model/Cita'
-import Recordatorio from '../model/Recordatorio'
+import Usuario from './model/usuario'
+import CatalogoMedicinas from './model/medCatalogo'
+import Receta from './model/receta'
+import Horario from './model/horario'
+import Citas from './model/cita'
+import Recordatorios from './model/recordatorio'
 
 // ═══════════════════════════════════════════════════════════════
 // CONFIGURACIÓN DEL ADAPTADOR SQLite
@@ -59,9 +59,9 @@ const database = new Database({
     Usuario,
     CatalogoMedicinas,
     Receta,
-    HorarioMedicacion,
-    Cita,
-    Recordatorio,
+    Horario,
+    Citas,
+    Recordatorios,
   ],
 })
 
