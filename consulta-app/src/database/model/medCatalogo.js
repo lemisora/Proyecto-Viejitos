@@ -5,7 +5,7 @@ Catálogo de medicinas disponibles.
 Es una tabla de referencia que puede ser compartida entre usuarios.
 
 Relaciones:
-- has_many recetas (mucahs recetas pueden usar el mismo medicamemto)
+- has_many recetas (muchas recetas pueden usar el mismo medicamemto)
 */
 
 import { Model, Q } from "@nozbe/watermelondb";
