@@ -1,84 +1,88 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet, Button, Alert } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
+import withObservables from '@nozbe/with-observables';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+// Importamos la instancia de la base de datos y la colección que definiste
+import { database, usuariosCollection } from '../../src/database/database';
 
-// Se importan las funciones del módulo nativo TTS
-import { generateAudioFromTTS} from 'tts-to-audio-module';
+// ═══════════════════════════════════════════════════════════════
+// 1. COMPONENTE DE LA LISTA (Observador)
+// ═══════════════════════════════════════════════════════════════
+// Este componente recibe la prop 'usuarios' que le inyectará WatermelonDB
+const ListaUsuarios = ({ usuarios }) => {
+  return (
+    <FlatList
+      data={usuarios}
+      keyExtractor={(item) => item.id}
+      renderItem={({ item }) => (
+        <View style={styles.card}>
+          <Text style={styles.nombre}>{item.nombre} {item.apellidoP}</Text>
+          <Text style={styles.edad}>Edad aprox: {item.edad} años</Text>
+        </View>
+      )}
+      ListEmptyComponent={<Text style={styles.empty}>No hay usuarios todavía. ¡Agrega uno!</Text>}
+    />
+  );
+};
 
+// Conectamos el componente a la colección de forma reactiva
+const ListaUsuariosReactiva = withObservables([], () => ({
+  usuarios: usuariosCollection.query() // Observa todos los usuarios
+}))(ListaUsuarios);
+
+
+// ═══════════════════════════════════════════════════════════════
+// 2. PANTALLA PRINCIPAL
+// ═══════════════════════════════════════════════════════════════
 export default function HomeScreen() {
 
-  // Función para probar la generación de audio
-  const handleGenerateAudio = async () => {
+  // Función para agregar un usuario de prueba a la BD
+  const agregarUsuarioPrueba = async () => {
     try {
-      const result = await generateAudioFromTTS("Hola, este es un audio generado desde NixOS");
-      Alert.alert("Éxito", `Audio generado en: ${result}`);
-    } catch (error: any) {
-      Alert.alert("Error", error.message);
-    }
-  };
-
-  // Función para probar añadir un recordatorio
-  const handleAddReminder = async () => {
-    try {
-      // const result = await addReminder("Tomar medicina");
-      Alert.alert("Recordatorio", "Recordatorio agregado");
-    } catch (error: any) {
-      Alert.alert("Error", error.message);
+      // TODA escritura en WatermelonDB debe ir dentro de database.write()
+      await database.write(async () => {
+        await usuariosCollection.create(usuario => {
+          usuario.nombre = 'Juan';
+          usuario.apellidoP = 'Pérez';
+          usuario.apellidoM = 'Gómez';
+          // Generamos una fecha de nacimiento de hace unos 70 años aprox (timestamp)
+          usuario.fechaNacimiento = Date.now() - (70 * 365 * 24 * 60 * 60 * 1000); 
+          usuario.telefono = '555-1234';
+        });
+      });
+      console.log("¡Usuario agregado con éxito!");
+    } catch (error) {
+      console.error("Error al agregar usuario:", error);
     }
   };
 
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
+    <View style={styles.container}>
+      <Text style={styles.titulo}>Base de Datos Local</Text>
+      
+      {/* Usamos el componente reactivo que creamos arriba */}
+      <View style={styles.listaContainer}>
+        <ListaUsuariosReactiva />
+      </View>
 
-      {/*Sección para probar la generación de audio*/}
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 4: Native Module Test</ThemedText>
-        <ThemedText>
-          Usa los botones de abajo para probar tu módulo nativo TTS.
-        </ThemedText>
-        <ThemedView style={styles.buttonContainer}>
-          <Button title="Generar Audio TTS" onPress={handleGenerateAudio} />
-          <Button title="Añadir Recordatorio" onPress={handleAddReminder} color="#4CAF50" />
-        </ThemedView>
-      </ThemedView>
-    </ParallaxScrollView>
+      <TouchableOpacity style={styles.boton} onPress={agregarUsuarioPrueba}>
+        <Text style={styles.textoBoton}>+ Agregar Paciente de Prueba</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 
+// ═══════════════════════════════════════════════════════════════
+// ESTILOS BÁSICOS
+// ═══════════════════════════════════════════════════════════════
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  buttonContainer: {
-    gap: 10,
-    marginTop: 5,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
+  container: { flex: 1, padding: 20, backgroundColor: '#f5f5f5', marginTop: 40 },
+  titulo: { fontSize: 24, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
+  listaContainer: { flex: 1, marginBottom: 20 },
+  card: { backgroundColor: 'white', padding: 15, borderRadius: 10, marginBottom: 10, elevation: 2 },
+  nombre: { fontSize: 18, fontWeight: 'bold' },
+  edad: { color: '#666', marginTop: 5 },
+  empty: { textAlign: 'center', color: '#999', marginTop: 50, fontSize: 16 },
+  boton: { backgroundColor: '#007AFF', padding: 15, borderRadius: 10, alignItems: 'center' },
+  textoBoton: { color: 'white', fontSize: 16, fontWeight: 'bold' }
 });
